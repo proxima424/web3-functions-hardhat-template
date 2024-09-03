@@ -57,6 +57,7 @@ cp .env.example .env
 
 ```
 ALCHEMY_ID=
+INFURA_ID=
 PRIVATE_KEY=
 ```
 
@@ -72,7 +73,7 @@ In `hardhat.config.ts`, you can set up configurations for your Web3 Function run
   w3f: {
     rootDir: "./web3-functions",
     debug: false,
-    networks: ["mumbai", "goerli", "baseGoerli"],
+    networks: ["amoy", "goerli", "baseGoerli"],
   },
 ```
 

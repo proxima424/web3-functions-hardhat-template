@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
   w3f: {
     rootDir: "./web3-functions",
     debug: false,
-    networks: ["ethereum", "sepolia", "polygon", "hardhat", "mumbai"], //(multiChainProvider) injects provider for these networks
+    networks: ["ethereum", "sepolia", "polygon", "hardhat", "amoy"], //(multiChainProvider) injects provider for these networks
   },
 
   namedAccounts: {
@@ -47,8 +47,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 31337,
       forking: {
-        url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 43781363,
+        url: `https://polygon-amoy.g.alchemy.com/v2/${ALCHEMY_ID}`,
+        blockNumber: 4628220,
       },
     },
 
@@ -201,11 +201,6 @@ const config: HardhatUserConfig = {
     lisksepolia: {
       chainId: 4202,
       url: `https://rpc.lisk-sepolia-testnet.gelato.digital`,
-      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
-    },
-    mumbai: {
-      chainId: 80001,
-      url: `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_ID}`,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
     osepolia: {

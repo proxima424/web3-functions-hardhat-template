@@ -30,7 +30,7 @@ Replace placeholders with your target contract address, the event ABI signature,
 Deploy the Web3 function to the Gelato Network with the following TypeScript function:
 
 ```
-yarn hardhat run .\scripts\create-task-event-filter.ts --network mumbai
+yarn hardhat run .\scripts\create-task-event-filter.ts --network amoy
 ```
 
 ```
