@@ -135,7 +135,3 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
 // Llama 3.1 8B Instruct, Mistral 7B Instruct
 
-
-// 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 
-
-// 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 
