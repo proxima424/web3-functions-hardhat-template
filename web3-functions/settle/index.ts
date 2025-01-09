@@ -9,6 +9,9 @@ import { parseAbi } from 'viem'
 
 import {Groq} from "groq-sdk";
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const PNP_MARKET_ABI = ["event PnpTwitterMarketCreated(bytes32 indexed conditionId, address indexed marketCreator)",
     "function settleTwitterMarket(bytes32 conditionId, uint256 _winningTokenId)",
 ];
@@ -69,7 +72,7 @@ async function fetchTweets(username: string, numTweets: number) {
 
 Web3Function.onRun(async (context: Web3FunctionEventContext) => {
     // Get event log from Web3FunctionEventContext
-  const { userArgs, multiChainProvider, log } = context;
+  const { userArgs, multiChainProvider, storage, log } = context;
 
   const baseProvider = multiChainProvider.chainId(8453);
   const url = baseProvider.connection.url;
@@ -77,8 +80,6 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
 
   const marketAddress = userArgs.marketAddress as string;
   const abi = PNP_MARKET_ABI;
-  const marketContract = new Contract(marketAddress, abi, baseProvider);
-
   const betterABI = parseAbi(PNP_MARKET_ABI);
 
   // from the event conditionId, get the market question from mapping
@@ -109,8 +110,36 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
   console.log(`Market question: ${marketQuestion}\n`);
   console.log(`Market twitter username: ${marketTwitterUsername}\n`);
 
-  const tweets = await fetchTweets(marketTwitterUsername as string, 20);
-  const tweetsAsString = tweets.map((tweet) => tweet.tweetText).join("\n");
+//   const tweets = await fetchTweets(marketTwitterUsername as string, 40);
+  // init scraper
+  const scraper = new Scraper();
+  const prevCookies = (await storage.get("x-cookies"));
+  if ( prevCookies ) {
+    await scraper.setCookies(JSON.parse(prevCookies));
+  }
+  else {
+    await scraper.login(
+      process.env.TWITTER_USERNAME as string,
+      process.env.TWITTER_PASSWORD as string,
+    );
+    const newCookies = await scraper.getCookies();
+    await storage.set("x-cookies", JSON.stringify(newCookies));
+  }
+
+  const tweetsGenerator = await scraper.getTweets(marketTwitterUsername as string, 20);
+  const tweetList = [];
+
+    for await (const tweet of tweetsGenerator) {
+        const isRetweet = tweet.isRetweet;
+        const tweetText = isRetweet && tweet.retweetedStatus ? tweet.retweetedStatus.text : tweet.text;
+
+        tweetList.push({
+            isRetweet,
+            tweetText
+        });
+    }
+
+  const tweetsAsString = tweetList.map((tweet) => tweet.tweetText).join("\n");
   const prediction = await analyzeTweetsForPrediction(marketQuestion as string, tweetsAsString);
   console.log(`Prediction: ${prediction}\n`);
 
@@ -128,10 +157,41 @@ Web3Function.onRun(async (context: Web3FunctionEventContext) => {
   };
 
 
-});
+// });
 
 
 //standard
 
 // Llama 3.1 8B Instruct, Mistral 7B Instruct
 
+// async function main(){
+
+//     const marketQuestion = "Donald Trump is against the inflow of illegal migrants is it?";
+    
+//     // Fetch tweets from Donald Trump
+//     console.log("Fetching tweets...");
+//     const tweets = await fetchTweets("realDonaldTrump", 69);
+    
+//     // Convert tweets to a single string
+//     const tweetsAsString = tweets.map(tweet => tweet.tweetText).join("\n");
+      
+//     // Analyze tweets
+//     console.log("Analyzing tweets...");
+//     const prediction = await analyzeTweetsForPrediction(marketQuestion, tweetsAsString);
+    
+//     console.log("Market Question:", marketQuestion);
+//     console.log("Prediction Result:", prediction);
+
+//     // // Print tweets
+//     // console.log("Tweets:");
+//     // console.log(tweetsAsString);
+
+// }
+
+// main().catch(console.error);
+
+
+
+// scraper.getCookies().then(cookies => {
+// storage.set('cookies', JSON.stringify(cookies));
+// });
